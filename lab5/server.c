@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdarg.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include "commands.h" //LAB 5 CODE
@@ -29,6 +29,7 @@ int ls_dir(char *dirname);
 int ls_file(char *fname);
 void mypwd();
 void mycd(char* dname);
+int sendData(const char *line, ...);
 
 // Server initialization code:
 
@@ -98,7 +99,7 @@ main(int argc, char *argv[])
    char cmd[MAX], pathname[MAX];
    char cwd[128];
    char *tok;
-   char cmdArgs[2][MAX];
+   char cmdArgs[2][MAX] = {0};
    int cmdCount = 0;
 
    getcwd(cwd, 128);   // get CWD pathname
@@ -153,8 +154,8 @@ main(int argc, char *argv[])
         tok = strtok(NULL, " ");
         cmdCount++;
       }
-      cmd = cmdArgs[0];
-      pathname = cmdArgs[1];
+      strcpy(cmd, cmdArgs[0]);
+      strcpy(pathname, cmdArgs[1]);
 
       if(strcmp(cmd, "pwd") == 0)
       {
@@ -310,7 +311,7 @@ int ls_dir(char *dirname)
   struct dirent *d = readdir(dp);
   while(d != NULL)
   {
-    printf("%s\n", d->d_name);
+    sendData("%s\n", d->d_name);
     d = readdir(dp);
   }
   return 0;
@@ -326,22 +327,22 @@ int ls_file(char *fname)
   //printf("name=%s\n", fname); getchar();
 
   if ( (r = lstat(fname, &fstat)) < 0){
-     printf("can't stat %s\n", fname); 
+     sendData("can't stat %s\n", fname); 
      exit(1);
   }
 
   if ((sp->st_mode & 0xF000) == 0x8000)
-     printf("%c",'-');
+     sendData("%c",'-');
   if ((sp->st_mode & 0xF000) == 0x4000)
-     printf("%c",'d');
+     sendData("%c",'d');
   if ((sp->st_mode & 0xF000) == 0xA000)
-     printf("%c",'l');
+     sendData("%c",'l');
 
   for (i=8; i >= 0; i--){
     if (sp->st_mode & (1 << i))
-	printf("%c", t1[i]);
+	sendData("%c", t1[i]);
     else
-	printf("%c", t2[i]);
+	sendData("%c", t2[i]);
   }
 
   printf("%4d ",sp->st_nlink);
@@ -352,16 +353,16 @@ int ls_file(char *fname)
   // print time
   strcpy(ftime, ctime(&sp->st_ctime));
   ftime[strlen(ftime)-1] = 0;
-  printf("%s  ",ftime);
+  sendData("%s  ",ftime);
 
   // print name
-  printf("%s", basename(fname));  
+  sendData("%s", basename(fname));  
 
   // print -> linkname if it's a symbolic file
   if ((sp->st_mode & 0xF000)== 0xA000){ // YOU FINISH THIS PART
      // use readlink() SYSCALL to read the linkname
      readlink(fname, linkname, 64);
-     printf(" -> %s", linkname);
+     sendData(" -> %s", linkname);
   }
   printf("\n");
   return 0;
@@ -376,5 +377,19 @@ void mypwd()
 void mycd(char* dname)
 {
   chdir(dname);
+}
+
+int sendData(const char *line, ...)
+{
+  char message[MAX];
+  va_list args;
+  va_start(args, line);
+  vsprintf(message, line, args);
+
+  // send the echo line to client 
+  n = write(client_sock, message, MAX);
+  printf("sent: %s\n", message);
+
+  va_end(args);
 }
 

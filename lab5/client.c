@@ -29,16 +29,17 @@ int SERVER_IP, SERVER_PORT;
 char *t1 = "xwrxwrxwr-------";
 char *t2 = "----------------";
 
-int mymkdir (char *dirname);
-int myrmdir(char *dirname);
+int mymkdir (char *dname);
+int myrmdir(char *dname);
 int myrm(char *filename);
 int mycat(char *filename);
 int mycp(char *file1, char *file2);
-int myls(char *dirname);
-int ls_dir(char *dirname);
+int myls(char dname[128]);
+int ls_dir(char *dname);
 int ls_file(char *fname);
 void mypwd();
 void mycd(char* dname);
+int readMessage(char *msg);
 
 // clinet initialization code
 
@@ -89,7 +90,7 @@ main(int argc, char *argv[ ])
 {
        //*Lab 5 CODE
   char *tok;
-  char cmdArgs[2][MAX];
+  char cmdArgs[2][MAX] = {'\0'};
   char cwd[128];
   int cmdCount = 0;
        //LAB 5 CODE*
@@ -100,6 +101,7 @@ main(int argc, char *argv[ ])
        //*Lab 5 CODE
   getcwd(cwd, 128);   // get CWD pathname
        // Lab 5 CODE*
+  printf("cwd: %s\n", cwd);
 
   if (argc < 3){
      printf("Usage : client ServerName ServerPort\n");
@@ -145,8 +147,13 @@ main(int argc, char *argv[ ])
     }
     else if (strcmp(cmdArgs[0], "lls") == 0) 
     {
+      printf("args: %s\n", cmdArgs[1]);
       if(strcmp(cmdArgs[1],"") != 0) {myls(cmdArgs[1]);}
-      else {myls(cwd);}
+      else 
+      {
+        printf("cwd: %s\n", cwd);
+        myls(cwd);
+      }
     }
     else if (strcmp(cmdArgs[0], "lcd") == 0) 
     {
@@ -178,18 +185,20 @@ main(int argc, char *argv[ ])
       n = write(server_sock, cmdArgs[0], MAX);
       printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
       // Send command pathname
-      n = write(server_sock, cmdArgs[0], MAX);
-      printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
+      //n = write(server_sock, cmdArgs[0], MAX);
+      //printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
 
       // Now read the Reply and Results in from the Server...
 
       //REPLY
-      n = read(server_sock, ans, MAX);
-      printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
+      //n = read(server_sock, ans, MAX);
+      //printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
 
       //RESULTS
-      n = read(server_sock, ans, MAX);
-      printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
+      //n = read(server_sock, ans, MAX);
+      //printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
+
+      readMessage(ans);
     }
          // Lab 5 CODE*
 
@@ -204,16 +213,16 @@ main(int argc, char *argv[ ])
   }
 }
 
-int mymkdir(char *dirname)
+int mymkdir(char *dname)
 {
   if (mkdir("newdir", 0777) < 0){
     printf("errno=%d : %s\n", errno, strerror(errno));}
   return 0;
 }
 
-int myrmdir(char *dirname)
+int myrmdir(char *dname)
 {
-  rmdir(dirname);
+  rmdir(dname);
   return 0;
 }
 
@@ -262,22 +271,24 @@ int mycp(char *file1, char *file2)
 }
 
 //from KC's class notes #8
- int myls(char *dirname)
+ int myls(char dname[128])
 {
+  printf("directory name: %s\n", dname);
   struct stat mystat, *sp;
   int r;
+  
   sp = &mystat;
-  if (r = lstat(dirname, sp) < 0){
-     printf("no such file %s\n", dirname); return(1);
+  if (r = lstat(dname, sp) < 0){
+     printf("no such file %s\n", dname); return(1);
   }
-  if (S_ISDIR(sp->st_mode)) {ls_dir(dirname);}
-  else {ls_file(dirname);}
+  if (S_ISDIR(sp->st_mode)) {ls_dir(dname);}
+  else {ls_file(dname);}
   return 0;
 }
 
-int ls_dir(char *dirname)
+int ls_dir(char *dname)
 {
-  DIR *dp = opendir(dirname);
+  DIR *dp = opendir(dname);
   struct dirent *d = readdir(dp);
   while(d != NULL)
   {
@@ -349,5 +360,16 @@ void mycd(char* dname)
   chdir(dname);
 }
 
+int readMessage(char *msg)
+{
+  // keep reading line from server until EOS is received
+  int n = 0;
+  n = read(server_sock, msg, MAX);
+  while(strcmp(msg, "EOS"))
+  {
+    printf("%s", msg);
+    n = read(server_sock, msg, MAX);
+  }
+}
 
 
