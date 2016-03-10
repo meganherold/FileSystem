@@ -1,17 +1,10 @@
 //Erik Lystad and Megan McPherson
 //for use with client.c and server.c
 
-int mymkdir(char *dirname);
-int myrmdir(char *dirname);
-int myrm(char *filename);
-int mycat(char *filename);
-int mycp(char *file1, char *file2);
-int myls(char *dirname);
-int ls_dir(char *dirname);
-int ls_file(char *fname);
-void mypwd();
-void rpwd(Node *p);
+#include "commands.h"
 
+char *t1 = "xwrxwrxwr-------";
+char *t2 = "----------------";
 
 int mymkdir(char *dirname)
 {
@@ -147,23 +140,12 @@ int ls_file(char *fname)
   return 0;
 }
 
-void mypwd(char *root, char *pwd)
+void mypwd()
 {
-  if(cwd == root)
-    printf("/");
-  else
-    rpwd(cwd);
+  char buf[256];
+  getcwd(buf, 256);
+}
 }
 
-void rpwd(Node *p)
-{
-  if(p == root)
-    return;
-  else
-  {
-    rpwd(p->parent);
-    printf("/%s", p->name);
-  }
-  
-}
+
 
