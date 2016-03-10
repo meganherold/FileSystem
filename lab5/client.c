@@ -187,7 +187,7 @@ main(int argc, char *argv[ ])
     else // Not a local command, work with the sever
     {
       // Send command to server
-      n = write(server_sock, cmdArgs[0], MAX);
+      n = write(server_sock, line, MAX);
       printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
       // Send command pathname
       //n = write(server_sock, cmdArgs[0], MAX);
@@ -220,7 +220,7 @@ main(int argc, char *argv[ ])
 
 int mymkdir(char *dname)
 {
-  if (mkdir("newdir", 0777) < 0){
+  if (mkdir(dname, 0777) < 0){
     printf("errno=%d : %s\n", errno, strerror(errno));}
   return 0;
 }
