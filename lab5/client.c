@@ -220,7 +220,7 @@ main(int argc, char *argv[ ])
 
 int mymkdir(char *dname)
 {
-  if (mkdir("newdir", 0777) < 0){
+  if (mkdir(dname, 0777) < 0){
     printf("errno=%d : %s\n", errno, strerror(errno));}
   return 0;
 }
