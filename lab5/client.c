@@ -129,7 +129,7 @@ main(int argc, char *argv[ ])
 
     while(tok != NULL)
     {
-      strcpy(cmdArgs[0], tok);
+      strcpy(cmdArgs[cmdCount-1], tok);
       tok = strtok(NULL, " ");
       cmdCount++;
     }
