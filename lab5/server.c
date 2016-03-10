@@ -97,6 +97,9 @@ main(int argc, char *argv[])
    size_t sz;
    char cmd[MAX], pathname[MAX];
    char cwd[128];
+   char *tok;
+   char cmdArgs[2][MAX];
+   int cmdCount = 0;
 
    getcwd(cwd, 128);   // get CWD pathname
 
@@ -104,6 +107,8 @@ main(int argc, char *argv[])
       hostname = "localhost";
    else
       hostname = argv[1];
+
+   
  
    server_init(hostname); 
 
@@ -126,8 +131,8 @@ main(int argc, char *argv[])
 
      // Processing loop: newsock <----> client
      while(1){
-       n = read(client_sock, cmd, MAX); //read the cmd sent from client
-       m = read(client_sock, pathname, MAX); // read the pathname sent from client
+       n = read(client_sock, line, MAX); //read the cmd sent from client
+       //m = read(client_sock, pathname, MAX); // read the pathname sent from client
        if (n==0){
            printf("server: client died, server loops\n");
            close(client_sock);
@@ -135,11 +140,21 @@ main(int argc, char *argv[])
       }
       
       // show the client passes
-      printf("server: read  n=%d bytes; cmd=[%s]\n", n, cmd);
-      printf("server: read  m=%d bytes; pathname=[%s]\n", m, pathname);
+      printf("server: read  n=%d bytes; line=[%s]\n", n, line);
       
       //strcat(cmd, " ");
       //strcat(pathname, " ");
+      tok = strtok(line, " ");
+      cmdCount++;
+
+      while(tok != NULL)
+      {
+        strcpy(cmdArgs[cmdCount-1], tok);
+        tok = strtok(NULL, " ");
+        cmdCount++;
+      }
+      cmd = cmdArgs[0];
+      pathname = cmdArgs[1];
 
       if(strcmp(cmd, "pwd") == 0)
       {
