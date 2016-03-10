@@ -5,7 +5,7 @@
 
 #include <sys/socket.h>
 #include <netdb.h>
-#include "commands.h" //LAB 5 CODE
+
 #define  MAX 256
 
 // Define variables:
@@ -82,9 +82,6 @@ main(int argc, char *argv[])
    int num1, num2, result;
    size_t sz;
    char cmd[MAX], pathname[MAX];
-   char cwd[128];
-
-   getcwd(cwd, 128);   // get CWD pathname
 
    if (argc < 2)
       hostname = "localhost";
@@ -120,86 +117,26 @@ main(int argc, char *argv[])
            break;
       }
       
-      // show the client passes
-      printf("server: read  n=%d bytes; cmd=[%s]\n", n, cmd);
-      printf("server: read  m=%d bytes; pathname=[%s]\n", m, pathname);
+      // show the line string
+      printf("server: read  n=%d bytes; line=[%s]\n", n, cmd);
+      printf("server: read  m=%d bytes; line=[%s]\n", m, pathname);
       
       strcat(cmd, " ");
       strcat(pathname, " ");
 
-      if(strcmp(cmd, "pwd") == 0)
-      {
-        mypwd(cwd);
-      }
-      else if(strcmp(cmd, "ls") == 0)
-      {
-        if(strcmp(pathname,"") != 0) {myls(pathname);}
-        else {myls(cwd);}
-      }
-      else if(strcmp(cmd, "cd") == 0)
-      {
-        if(strcmp(pathname,"") != 0) {mycd(pathname);}
-        else {mycd(cwd);}
-      }
-      else if(strcmp(cmd, "mkdir") == 0)
-      {
-        if(strcmp(pathname,"") != 0) {mymkdir(pathname);}
-        else 
-        {
-          printf("ERROR: pathname not given by client");
-          strcpy(line, "ERROR: pathname not given...");
+      // send the echo line to client 
 
-          n = write(client_sock, line, MAX);
-          printf("server: wrote n=%d bytes; result=[%s]\n", n, line);
-          printf("server: ready for next request\n");
-        }
-      }
-      else if(strcmp(cmd, "rmdir") == 0)
-      {
-        if(strcmp(pathname,"") != 0) {myrmdir(pathname);}
-        else 
-        {
-          printf("ERROR: pathname not given by client");
-          strcpy(line, "ERROR: pathname not given...");}
+      /*
+      sscanf(line, "%d %d", &num1, &num2);
+      result = num1 + num2;
+      sprintf(line, "%d + %d = %d", num1, num2, result); 
+      
+      sprintf(line, "sum: %d\n", result);
+      */
+      n = write(client_sock, line, MAX);
 
-          n = write(client_sock, line, MAX);
-          printf("server: wrote n=%d bytes; result=[%s]\n", n, line);
-          printf("server: ready for next request\n");
-        }
-      }
-      else if(strcmp(cmd, "rm") == 0)
-      {
-        if(strcmp(pathname,"") != 0) {myrm(pathname);}
-        else 
-        {
-          printf("ERROR: pathname not given by client");
-          strcpy(line, "ERROR: pathname not given...");}
-
-          n = write(client_sock, line, MAX);
-          printf("server: wrote n=%d bytes; result=[%s]\n", n, line);
-          printf("server: ready for next request\n");
-        }
-          
-      }
-      else if(strcmp(cmd, "get") == 0)
-      {
-        //TODO ADD CALL FOR GET WHEN THE FUNCTION IS WRITTEN
-      }
-      else if(strcmp(cmd, "put") == 0)
-      {
-        //TODO ADD CALL FOR PUT WHEN THE FUNCTION IS WRITTEN
-      }
-      else 
-      {
-        printf("Client passed an improper command...");
-        strcpy(line, "Client passed an improper command...");
-
-        n = write(client_sock, line, MAX);
-        printf("server: wrote n=%d bytes; result=[%s]\n", n, line);
-        printf("server: ready for next request\n");
-      }
-
-
+      printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, line);
+      printf("server: ready for next request\n");
     }
  }
 }
