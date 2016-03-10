@@ -39,7 +39,6 @@ int ls_dir(char *dname);
 int ls_file(char *fname);
 void mypwd();
 void mycd(char* dname);
-int readMessage(char *msg);
 
 // clinet initialization code
 
@@ -175,9 +174,15 @@ main(int argc, char *argv[ ])
       if(strcmp(cmdArgs[1],"") != 0) {myrm(cmdArgs[1]);}
       else {printf("ERROR: pathname not given");}
     }
+    else if (strcmp(cmdArgs[0], "get") == 0) 
+    {
+      if(strcmp(cmdArgs[1],"") != 0) {mycp(cmdArgs[1], cwd);}
+      else {printf("ERROR: pathname not given");}
+    }
     else if (strcmp(cmdArgs[0], "quit") == 0) 
     {
-      //CLIENT EXIT
+      printf("Goodbye!\n");
+      return 0;
     }
     else // Not a local command, work with the sever
     {
@@ -198,7 +203,7 @@ main(int argc, char *argv[ ])
       //n = read(server_sock, ans, MAX);
       //printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
 
-      readMessage(ans);
+      readData(ans);
     }
          // Lab 5 CODE*
 
@@ -248,27 +253,6 @@ int mycat(char *filename)
   return 0;
 }
 
-//from KC's class notes #9
-int mycp(char *file1, char *file2)
-{
-  #define BLKSIZE 4096
-  int fd, gd;
-  char buf[4096];                                   
-  int n, total=0;                   
-  //if (argc < 3) {return(1);}
-  fd = open(file1, O_RDONLY);
-  if (fd < 0) {return(2);}          
-  gd=open(file2,O_WRONLY|O_CREAT);
-  if (gd < 0) {return(3);}
-  while (n=read(fd, buf, BLKSIZE))  
-  {                                 
-     write(gd, buf, n);       
-     total += n;
-  }                                 
-  printf("total=%d\n",total);       
-  close(fd); close(gd);
-  return 0;                                        
-}
 
 //from KC's class notes #8
  int myls(char dname[128])
@@ -360,7 +344,7 @@ void mycd(char* dname)
   chdir(dname);
 }
 
-int readMessage(char *msg)
+int readData(char *msg)
 {
   // keep reading line from server until EOS is received
   int n = 0;
@@ -371,5 +355,28 @@ int readMessage(char *msg)
     n = read(server_sock, msg, MAX);
   }
 }
+
+//from KC's class notes #9
+int mycp(char *file1, char *file2)
+{
+  #define BLKSIZE 4096
+  int fd, gd;
+  char buf[4096];                                   
+  int n, total=0;                   
+  //if (argc < 3) {return(1);}
+  fd = open(file1, O_RDONLY);
+  if (fd < 0) {return(2);}          
+  gd=open(file2,O_WRONLY|O_CREAT);
+  if (gd < 0) {return(3);}
+  while (n=read(fd, buf, BLKSIZE))  
+  {                                 
+     write(gd, buf, n);       
+     total += n;
+  }                                 
+  printf("total=%d\n",total);       
+  close(fd); close(gd);
+  return 0;                                        
+}
+
 
 

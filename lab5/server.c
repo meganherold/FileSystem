@@ -211,13 +211,19 @@ main(int argc, char *argv[])
         }
           
       }
-      else if(strcmp(cmd, "get") == 0)
-      {
-        //TODO ADD CALL FOR GET WHEN THE FUNCTION IS WRITTEN
-      }
+     
       else if(strcmp(cmd, "put") == 0)
       {
-        //TODO ADD CALL FOR PUT WHEN THE FUNCTION IS WRITTEN
+        if(strcmp(pathname,"") != 0) {mycp(pathname, cwd);}
+        else 
+        {
+          printf("ERROR: pathname not given by client");
+          strcpy(line, "ERROR: pathname not given...");
+
+          n = write(client_sock, line, MAX);
+          printf("server: wrote n=%d bytes; result=[%s]\n", n, line);
+          printf("server: ready for next request\n");
+        }
       }
       else 
       {
@@ -267,28 +273,6 @@ int mycat(char *filename)
      for (i=0; i < n; i++){putchar(buf[i]); }
   }
   return 0;
-}
-
-//from KC's class notes #9
-int mycp(char *file1, char *file2)
-{
-  #define BLKSIZE 4096
-  int fd, gd;
-  char buf[4096];                                   
-  int n, total=0;                   
-  //if (argc < 3) {return(1);}
-  fd = open(file1, O_RDONLY);
-  if (fd < 0) {return(2);}          
-  gd=open(file2,O_WRONLY|O_CREAT);
-  if (gd < 0) {return(3);}
-  while (n=read(fd, buf, BLKSIZE))  
-  {                                 
-     write(gd, buf, n);       
-     total += n;
-  }                                 
-  printf("total=%d\n",total);       
-  close(fd); close(gd);
-  return 0;                                        
 }
 
 //from KC's class notes #8
@@ -388,8 +372,30 @@ int sendData(const char *line, ...)
 
   // send the echo line to client 
   n = write(client_sock, message, MAX);
-  printf("sent: %s\n", message);
+  printf("sent: %s", message);
 
   va_end(args);
+}
+
+//from KC's class notes #9
+int mycp(char *file1, char *file2)
+{
+  #define BLKSIZE 4096
+  int fd, gd;
+  char buf[4096];                                   
+  int n, total=0;                   
+  //if (argc < 3) {return(1);}
+  fd = open(file1, O_RDONLY);
+  if (fd < 0) {return(2);}          
+  gd=open(file2,O_WRONLY|O_CREAT);
+  if (gd < 0) {return(3);}
+  while (n=read(fd, buf, BLKSIZE))  
+  {                                 
+     write(gd, buf, n);       
+     total += n;
+  }                                 
+  printf("total=%d\n",total);       
+  close(fd); close(gd);
+  return 0;                                        
 }
 
