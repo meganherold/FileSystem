@@ -132,6 +132,11 @@ main(int argc, char *argv[])
 
      // Processing loop: newsock <----> client
      while(1){
+       //strcpy(line,"");
+       //strcpy(tok,"");
+       cmdCount = 0;
+       strcpy(cmdArgs[0],"");
+       strcpy(cmdArgs[1],"");
        n = read(client_sock, line, MAX); //read the cmd sent from client
        //m = read(client_sock, pathname, MAX); // read the pathname sent from client
        if (n==0){
@@ -164,7 +169,12 @@ main(int argc, char *argv[])
       else if(strcmp(cmd, "ls") == 0)
       {
         if(strcmp(pathname,"") != 0) {myls(pathname);}
-        else {myls(cwd);}
+        else 
+        {
+          myls(cwd);
+          
+        }
+        printf("Done\n");
       }
       else if(strcmp(cmd, "cd") == 0)
       {
@@ -234,7 +244,8 @@ main(int argc, char *argv[])
         printf("server: wrote n=%d bytes; result=[%s]\n", n, line);
         printf("server: ready for next request\n");
       }
-
+      //done, send EOS to client
+      n = write(client_sock, "EOS", MAX);
 
     }
  }
@@ -356,6 +367,7 @@ void mypwd()
 {
   char buf[256];
   getcwd(buf, 256);
+  sendData("%s\n", buf);
 }
 
 void mycd(char* dname)

@@ -93,6 +93,7 @@ main(int argc, char *argv[ ])
   char cwd[128];
   int cmdCount = 0;
        //LAB 5 CODE*
+  char temp[MAX];
 
   int n;
   char line[MAX], ans[MAX];
@@ -115,26 +116,39 @@ main(int argc, char *argv[ ])
     //bzero(line, MAX);                // zero out line[ ]
 
           // *LAB 5 CODE
+    cmdCount = 0;
+    strcpy(cmdArgs[0],"");
+    strcpy(cmdArgs[1],"");
+    
     printf("Input a command: ");    
           // LAB 5 CODE*
 
     fgets(line, MAX, stdin);         // get a line (end with \n) from stdin
-
+    //printf("line: %s\n", line);
     line[strlen(line)-1] = 0;        // kill \n at end
-    if (line[0]==0)                  // exit if NULL line
-       exit(0);
+    //printf("line[0]: %c\n", line[0]);
+    //if(line[0]==0)                  // exit if NULL line
+       //{exit(0);}
 
          // *Lab 5 CODE
+    strcpy(temp, line);
+    //printf("temp: %s\n", temp);
+    
     tok = strtok(line, " ");
     cmdCount++;
-
+    //printf("temp: %s\n", temp);
+    //printf("cmdArgs[0] = %s\n", cmdArgs[0]);
+    //printf("cmdCount: %d\n", cmdCount);
     while(tok != NULL)
     {
       strcpy(cmdArgs[cmdCount-1], tok);
       tok = strtok(NULL, " ");
       cmdCount++;
+      //printf("cmdCount: %d\n", cmdCount);
     }
-
+    //printf("cmdCount: %d\n", cmdCount);
+    //printf("line: %s\n", line);
+    //printf("cmdArgs[0] = %s\n", cmdArgs[0]);
     if(strcmp(cmdArgs[0], "lcat") == 0) 
     {
       if(strcmp(cmdArgs[1],"") != 0) {mycat(cmdArgs[1]);}
@@ -187,8 +201,8 @@ main(int argc, char *argv[ ])
     else // Not a local command, work with the sever
     {
       // Send command to server
-      n = write(server_sock, line, MAX);
-      printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
+      n = write(server_sock, temp, MAX);
+      printf("client: wrote n=%d bytes; line=(%s)\n", n, temp);
       // Send command pathname
       //n = write(server_sock, cmdArgs[0], MAX);
       //printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
@@ -337,6 +351,7 @@ void mypwd()
 {
   char buf[256];
   getcwd(buf, 256);
+  printf("%s\n", buf);
 }
 
 void mycd(char* dname)
